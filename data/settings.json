@@ -1,0 +1,15 @@
+{
+    "theme": "dark",
+
+    "typing_speed": 5,
+
+    "sound_enabled": true,
+
+    "human_mode": true,
+
+    "typing_delay_min": 0.05,
+
+    "typing_delay_max": 0.2,
+
+    "error_rate": 0.03
+}
