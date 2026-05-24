@@ -8,7 +8,7 @@ import core.config as config
 from core.utils import (
     random_delay,
     should_make_error,
-    get_random_char,
+    # get_random_char,
     backspace_delay
 )
 
@@ -35,25 +35,93 @@ pyautogui.FAILSAFE = True
 
 def get_wrong_word(real_word):
 
-    wrong_words = [
-        "hte",
-        "helo",
-        "recieve",
-        "teh",
-        "watre",
-        "machien",
-        "pythno",
-        "developr"
-    ]
+    if len(real_word) <= 3:
+        return real_word
 
-    wrong = random.choice(wrong_words)
+    word = list(real_word)
 
-    # Avoid same word
-    while wrong == real_word:
-        wrong = random.choice(wrong_words)
+    error_type = random.choice([
+        "missing",
+        "double",
+        "swap"
+    ])
 
-    return wrong
+    # Missing character
+    if error_type == "missing":
 
+        index = random.randint(1, len(word)-1)
+
+        del word[index]
+
+    # Double character
+    elif error_type == "double":
+
+        index = random.randint(0, len(word)-1)
+
+        word.insert(index, word[index])
+
+    # Swap nearby letters
+    elif error_type == "swap":
+
+        index = random.randint(0, len(word)-2)
+
+        word[index], word[index+1] = (
+            word[index+1],
+            word[index]
+        )
+
+    return "".join(word)
+
+# ---------------- REALISTIC TYPO SYSTEM ---------------- #
+
+KEYBOARD_NEIGHBORS = {
+
+    'a': ['s', 'q', 'z'],
+    'b': ['v', 'g', 'h', 'n'],
+    'c': ['x', 'd', 'f', 'v'],
+    'd': ['s', 'e', 'r', 'f', 'c', 'x'],
+    'e': ['w', 's', 'd', 'r'],
+    'f': ['d', 'r', 't', 'g', 'v', 'c'],
+    'g': ['f', 't', 'y', 'h', 'b', 'v'],
+    'h': ['g', 'y', 'u', 'j', 'n', 'b'],
+    'i': ['u', 'j', 'k', 'o'],
+    'j': ['h', 'u', 'i', 'k', 'm', 'n'],
+    'k': ['j', 'i', 'o', 'l'],
+    'l': ['k', 'o', 'p'],
+    'm': ['n', 'j', 'k'],
+    'n': ['b', 'h', 'j', 'm'],
+    'o': ['i', 'k', 'l', 'p'],
+    'p': ['o', 'l'],
+    'q': ['w', 'a'],
+    'r': ['e', 'd', 'f', 't'],
+    's': ['a', 'w', 'e', 'd', 'x', 'z'],
+    't': ['r', 'f', 'g', 'y'],
+    'u': ['y', 'h', 'j', 'i'],
+    'v': ['c', 'f', 'g', 'b'],
+    'w': ['q', 'a', 's', 'e'],
+    'x': ['z', 's', 'd', 'c'],
+    'y': ['t', 'g', 'h', 'u'],
+    'z': ['a', 's', 'x']
+}
+
+
+def get_realistic_typo(char):
+
+    lower_char = char.lower()
+
+    if lower_char in KEYBOARD_NEIGHBORS:
+
+        typo = random.choice(
+            KEYBOARD_NEIGHBORS[lower_char]
+        )
+
+        # Preserve uppercase
+        if char.isupper():
+            return typo.upper()
+
+        return typo
+
+    return char
 
 # ---------------- MAIN FUNCTION ---------------- #
 
@@ -180,15 +248,23 @@ def type_text(text, controller):
 
             if should_make_error(config.ERROR_RATE):
 
-                wrong_char = get_random_char()
+                wrong_char = get_realistic_typo(char)
 
-                sound_channel.play(typing_sound)
+                # Avoid same character
+                if wrong_char != char:
 
-                pyautogui.write(wrong_char)
+                    # Type wrong character
+                    sound_channel.play(typing_sound)
 
-                backspace_delay()
+                    pyautogui.write(wrong_char)
 
-                pyautogui.press("backspace")
+                    # Make mistake visible
+                    time.sleep(random.uniform(0.2, 0.5))
+
+                    # Backspace correction
+                    pyautogui.press("backspace")
+
+                    time.sleep(random.uniform(0.1, 0.2))
 
             # ---------------- TYPE REAL CHARACTER ---------------- #
 
