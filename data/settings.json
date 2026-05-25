@@ -1,15 +1,18 @@
 {
-    "theme": "dark",
-
+    "theme": "Dark",
     "typing_speed": 5,
-
     "sound_enabled": true,
-
     "human_mode": true,
-
     "typing_delay_min": 0.05,
-
     "typing_delay_max": 0.2,
-
-    "error_rate": 0.03
+    "error_rate": 0.03,
+    "custom_profiles": {
+        "Ultra Human": {
+            "min_delay": 0.04,
+            "max_delay": 0.15,
+            "error_rate": 0.05,
+            "sound": true,
+            "thinking_pause": true
+        }
+    }
 }
